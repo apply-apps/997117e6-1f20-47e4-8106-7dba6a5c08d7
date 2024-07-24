@@ -1,9 +1,40 @@
 // Filename: index.js
 // Combined code from all files
 
+// File: App.js
 import React from 'react';
-import { SafeAreaView, StyleSheet, Text, ScrollView, ActivityIndicator, View } from 'react-native';
-import { useEffect, useState } from 'react';
+import { SafeAreaView, StyleSheet, Text, ScrollView } from 'react-native';
+import WorkoutList from './WorkoutList';
+
+export default function App() {
+    return (
+        <SafeAreaView style={styles.container}>
+            <ScrollView>
+                <Text style={styles.title}>Workout Tracker</Text>
+                <WorkoutList />
+            </ScrollView>
+        </SafeAreaView>
+    );
+}
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        paddingTop: 40,
+        paddingHorizontal: 20,
+        backgroundColor: '#f8f9fa',
+    },
+    title: {
+        fontSize: 32,
+        fontWeight: 'bold',
+        marginBottom: 20,
+        textAlign: 'center',
+    },
+});
+
+// File: WorkoutList.js
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import axios from 'axios';
 
 const WorkoutList = () => {
@@ -54,18 +85,6 @@ const WorkoutList = () => {
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        paddingTop: 40,
-        paddingHorizontal: 20,
-        backgroundColor: '#f8f9fa',
-    },
-    title: {
-        fontSize: 32,
-        fontWeight: 'bold',
-        marginBottom: 20,
-        textAlign: 'center',
-    },
     listContainer: {
         marginTop: 20,
     },
@@ -95,13 +114,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default function App() {
-    return (
-        <SafeAreaView style={styles.container}>
-            <ScrollView>
-                <Text style={styles.title}>Workout Tracker</Text>
-                <WorkoutList />
-            </ScrollView>
-        </SafeAreaView>
-    );
-}
+export default WorkoutList;
