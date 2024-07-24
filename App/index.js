@@ -1,53 +1,107 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+// Filename: index.js
+// Combined code from all files
 
-const App = () => {
-  const fullText = 'Hi, this is Apply.\nCreating mobile apps is now as simple as typing text.\nJust input your idea and press APPLY, and our platform does the rest...';
-  const [displayedText, setDisplayedText] = useState('');
-  const [index, setIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
+import React from 'react';
+import { SafeAreaView, StyleSheet, Text, ScrollView, ActivityIndicator, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 
-  useEffect(() => {
-    if (isPaused) return;
+const WorkoutList = () => {
+    const [workouts, setWorkouts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    const interval = setInterval(() => {
-      setDisplayedText((prev) => prev + fullText[index]);
-      setIndex((prev) => {
-        if (prev === fullText.length - 1) {
-          setIsPaused(true);
-          setTimeout(() => {
-            setDisplayedText('');
-            setIndex(0);
-            setIsPaused(false);
-          }, 2000);
-          return 0;
-        }
-        return prev + 1;
-      });
-    }, 100);
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await axios.post("http://apihub.p.appply.xyz:3300/chatgpt", {
+                    messages: [
+                        { role: "system", content: "You are a helpful assistant. Please provide answers for given requests." },
+                        { role: "user", content: "Provide a list of workout routines" }
+                    ],
+                    model: "gpt-4o"
+                });
+                const resultString = response.data.response;
+                const workoutArray = resultString.split('\n').map((workout, index) => ({ id: index.toString(), title: workout }));
+                setWorkouts(workoutArray);
+            } catch (error) {
+                setError(error.message);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    return () => clearInterval(interval);
-  }, [index, isPaused]);
+        fetchData();
+    }, []);
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.text}>{displayedText}</Text>
-    </View>
-  );
+    if (loading) {
+        return <ActivityIndicator size="large" color="#007bff" style={styles.loading} />;
+    }
+
+    if (error) {
+        return <Text style={styles.error}>{error}</Text>;
+    }
+
+    return (
+        <View style={styles.listContainer}>
+            {workouts.map((workout) => (
+                <View key={workout.id} style={styles.workoutItem}>
+                    <Text style={styles.workoutText}>{workout.title}</Text>
+                </View>
+            ))}
+        </View>
+    );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    backgroundColor: 'black',
-    padding: 20,
-  },
-  text: {
-    color: 'white',
-    fontSize: 24,
-    fontFamily: 'monospace',
-  },
+    container: {
+        flex: 1,
+        paddingTop: 40,
+        paddingHorizontal: 20,
+        backgroundColor: '#f8f9fa',
+    },
+    title: {
+        fontSize: 32,
+        fontWeight: 'bold',
+        marginBottom: 20,
+        textAlign: 'center',
+    },
+    listContainer: {
+        marginTop: 20,
+    },
+    workoutItem: {
+        backgroundColor: '#ffffff',
+        padding: 15,
+        borderRadius: 10,
+        marginBottom: 15,
+        shadowColor: '#000000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 5,
+        elevation: 5,
+    },
+    workoutText: {
+        fontSize: 18,
+        fontWeight: '500',
+    },
+    loading: {
+        marginTop: 50,
+    },
+    error: {
+        fontSize: 18,
+        color: 'red',
+        textAlign: 'center',
+        marginTop: 50,
+    },
 });
 
-export default App;
+export default function App() {
+    return (
+        <SafeAreaView style={styles.container}>
+            <ScrollView>
+                <Text style={styles.title}>Workout Tracker</Text>
+                <WorkoutList />
+            </ScrollView>
+        </SafeAreaView>
+    );
+}
